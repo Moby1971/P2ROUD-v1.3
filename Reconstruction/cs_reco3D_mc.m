@@ -62,6 +62,9 @@ if ncoils>1 && autosense==1
        picscommand = [picscommand, ' -RT:7:0:',num2str(TVxyz)];
     end
     if LR>0
+       % Locally low-rank in the spatial domain 
+       blocksize = round(max([dimx dimy dimz])/16);  % Block size 
+       app.TextMessage(strcat('Low-rank block size =',{' '},num2str(blocksize)));
        picscommand = [picscommand, ' -RL:7:7:',num2str(LR)];
     end 
     if TVd>0
@@ -93,6 +96,9 @@ if ncoils==1 || autosense==0
        picscommand = [picscommand, ' -RT:7:0:',num2str(TVxyz)];
     end
     if LR>0
+       % Locally low-rank in the spatial domain 
+       blocksize = round(max([dimx dimy dimz])/16);  % Block size 
+       app.TextMessage(strcat('Low-rank block size =',{' '},num2str(blocksize)));
        picscommand = [picscommand, ' -RL:7:7:',num2str(LR)];
     end 
     if TVd>0

@@ -68,18 +68,23 @@ if ncoils>1 && autosense==1
     kspace_pics_sum = sum(kspace_pics,[11,12]);
     sensitivities = bart(app,'ecalib -S -I -a', kspace_pics_sum);      % ecalib with softsense
     
-    % For debugging purposes
-    % disp(size(sensitivities))
-    % figure(1)
-    % imshow(rot90(flip(squeeze(abs(sensitivities(1,:,:,1,1))),2)),[]);
-    % figure(2)
-    % imshow(rot90(flip(squeeze(abs(sensitivities(1,:,:,2,1))),2)),[]);
-    % figure(3)
-    % imshow(rot90(flip(squeeze(abs(sensitivities(1,:,:,3,1))),2)),[]);
-    % figure(4)
-    % imshow(rot90(flip(squeeze(abs(sensitivities(1,:,:,4,1))),2)),[]);
-    
-    picscommand = ['pics -S -RL:6:7:',num2str(LR),' -RW:6:0:',num2str(Wavelet),' -RT:6:0:',num2str(TVxy),' -RT:1024:0:',num2str(TVd)];
+    % pics reconstuction
+    picscommand = 'pics -S';
+    if Wavelet>0
+       picscommand = [picscommand,' -RW:6:0:',num2str(Wavelet)];
+    end
+    if TVxy>0
+       picscommand = [picscommand,' -RT:6:0:',num2str(TVxy)];
+    end
+    if LR>0
+       % Locally low-rank in the spatial domain 
+       blocksize = round(max([dimx dimy])/16);  % Block size 
+       app.TextMessage(strcat('Low-rank block size =',{' '},num2str(blocksize)));
+       picscommand = [picscommand,' -RL:6:6:',num2str(LR),' -b',num2str(blocksize)];
+    end
+    if TVd>0
+       picscommand = [picscommand,' -RT:1024:0:',num2str(TVd)];
+    end
     image_reg = bart(app,picscommand,kspace_pics,sensitivities);
     
     % Sum of squares reconstruction
@@ -97,8 +102,23 @@ if ncoils==1 || autosense==0
         sensitivities(:,:,:,i,:) = sensitivities(:,:,:,i,:)*coilsensitivities(i)*coilactive(i);
     end
   
-    % regular reconstruction
-    picscommand = ['pics -S -RL:6:7:',num2str(LR),' -RW:6:0:',num2str(Wavelet),' -RT:6:0:',num2str(TVxy),' -RT:1024:0:',num2str(TVd)];
+    % pics reconstruction
+    picscommand = 'pics -S';
+    if Wavelet>0
+       picscommand = [picscommand,' -RW:6:0:',num2str(Wavelet)];
+    end
+    if TVxy>0
+       picscommand = [picscommand,' -RT:6:0:',num2str(TVxy)];
+    end
+    if LR>0
+       % Locally low-rank in the spatial domain 
+       blocksize = round(max([dimx dimy])/16);  % Block size 
+       app.TextMessage(strcat('Low-rank block size =',{' '},num2str(blocksize)));
+       picscommand = [picscommand,' -RL:6:6:',num2str(LR),' -b',num2str(blocksize)];
+    end
+    if TVd>0
+       picscommand = [picscommand,' -RT:1024:0:',num2str(TVd)];
+    end
     image_reg = bart(app,picscommand,kspace_pics,sensitivities);
     image_reg = abs(image_reg);
     
